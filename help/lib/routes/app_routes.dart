@@ -1,0 +1,9 @@
+abstract class AppRoutes {
+  static const LOGIN = '/login';
+  static const SIGNUP = '/signup';
+  static const HOME = '/home';
+  static const CREATE_GROUP = '/create-group';
+  static const JOIN_GROUP = '/join-group';
+  static const GROUP_DETAIL = '/group-detail';
+  static const PRIORITY = '/priority';
+}

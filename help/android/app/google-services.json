@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "924194140304",
+    "project_id": "project-hellping-123",
+    "storage_bucket": "project-hellping-123.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924194140304:android:d93cfd8552d03955ee2815",
+        "android_client_info": {
+          "package_name": "com.example.project_hellping"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHXgxN1eXPo5qfN9E3eNIyvwnf0EQ5778"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

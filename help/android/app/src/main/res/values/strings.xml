@@ -1,0 +1,5 @@
+<resources>
+    <string name="firebase_database_url">
+        https://project-hellping-123-default-rtdb.asia-southeast1.firebasedatabase.app
+    </string>
+</resources>
