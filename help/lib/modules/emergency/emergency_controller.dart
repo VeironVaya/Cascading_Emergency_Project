@@ -144,7 +144,7 @@ class EmergencyController extends GetxController {
 
       // === Send to backend ===
       final res = await http.post(
-        Uri.parse("http://10.0.2.2:5000/emergency"), // Android emulator
+        Uri.parse("http://192.168.1.77:5000/emergency"), // Android emulator
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -164,5 +164,31 @@ class EmergencyController extends GetxController {
     } finally {
       isSending.value = false;
     }
+  }
+
+  // ========== ACCEPT EMERGENCY ==========
+  Future<void> acceptEmergency(String emergencyId) async {
+    final res = await http.post(
+      Uri.parse("http://192.168.1.77:5000/emergency/$emergencyId/accept"),
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "123456",
+      },
+    );
+
+    print("Backend accept response: ${res.body}");
+  }
+
+// ========== REJECT EMERGENCY ==========
+  Future<void> rejectEmergency(String emergencyId) async {
+    final res = await http.post(
+      Uri.parse("http://192.168.1.77:5000/emergency/$emergencyId/reject"),
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": "123456",
+      },
+    );
+
+    print("Backend reject response: ${res.body}");
   }
 }

@@ -1,7 +1,11 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { createEmergency } from "./controllers/emergencyController.js";
+import { 
+  createEmergency,
+  acceptEmergency,
+  rejectEmergency
+} from "./controllers/emergencyController.js";
 
 dotenv.config();
 
@@ -10,7 +14,11 @@ app.use(cors());
 app.use(express.json());
 
 app.post("/emergency", createEmergency);
+app.post("/emergency/:id/accept", acceptEmergency);
+app.post("/emergency/:id/reject", rejectEmergency);
 
 app.listen(5000, () => {
   console.log("🚀 Server running at http://localhost:5000");
 });
+
+
