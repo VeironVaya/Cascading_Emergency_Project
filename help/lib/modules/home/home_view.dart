@@ -30,19 +30,12 @@ class HomePage extends GetView<HomeController> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // MAIN MENU
-            EmergencyButtonWidget(
-              type: 'yellow',
-              color: Colors.yellow,
-              label: 'Yellow Emergency',
-            ),
             const SizedBox(height: 20),
             EmergencyButtonWidget(
               type: 'red',
               color: Colors.red,
               label: 'Red Emergency',
             ),
-
             const SizedBox(height: 20),
             MenuContainer(
               title: "Main Menu",
@@ -70,7 +63,6 @@ class HomePage extends GetView<HomeController> {
               },
               child: const Text("Test Push Notification"),
             ),
-
             const SizedBox(height: 24),
             Align(
               alignment: Alignment.centerLeft,
@@ -80,7 +72,6 @@ class HomePage extends GetView<HomeController> {
               ),
             ),
             const SizedBox(height: 12),
-
             Expanded(
               child: Obx(() {
                 if (controller.isLoading.value) {

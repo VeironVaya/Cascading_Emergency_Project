@@ -1,5 +1,6 @@
 import admin from "../firebase.js";
 import { sendFCM } from "../services/fcmService.js";
+import { cascadeToNext  } from "../services/cascadeService.js";
 
 export async function createEmergency(req, res) {
   try {
@@ -46,72 +47,51 @@ export async function createEmergency(req, res) {
     return res.status(500).json({ error: e.message });
   }
 
-  async function cascadeToNext(emergencyId, emergency) {
-  const db = admin.database().ref("emergencies/" + emergencyId);
 
-  let index = emergency.currentPriorityIndex;
-  const list = emergency.priorities;
 
-  if (index >= list.length) {
-    console.log("🔥 No more priorities left.");
-    await db.update({ status: "all_failed" });
-    return;
-  }
 
-  const helper = list[index];
-  const token = helper.fcmToken;
+}
 
-  if (!token) {
-    console.log(`❌ Priority ${index} has NO token → skipping`);
-    emergency.currentPriorityIndex++;
-    await db.update({ currentPriorityIndex: emergency.currentPriorityIndex });
-    return cascadeToNext(emergencyId, emergency);
-  }
 
-  console.log(`📨 Sending notification to priority ${index}:`, token);
 
-  await sendFCM(
-    token,
-    `Emergency: ${emergency.type}`,
-    `${emergency.need} — ${emergency.condition || ""}`,
-    { emergencyId }
-  );
 
-  // Update last sent time
-  const sentTime = Date.now();
+
+
+
+export async function acceptEmergency(req, res) {
+  const { id } = req.params;
+
+  const db = admin.database().ref("emergencies/" + id);
+
   await db.update({
-    lastSentAt: sentTime,
+    status: "accepted",
+    helperAccepted: true
   });
 
-  // ---- 3) Schedule next check in 5 seconds ----
-  setTimeout(async () => {
-    const snapshot = await db.get();
-    const updated = snapshot.val();
+  console.log("✅ Emergency accepted by helper");
 
-    // STOP if someone accepted
-    if (updated.helperAccepted === true) {
-      console.log("✅ Helper accepted. Stopping cascade.");
-      return;
-    }
-
-    // STOP if status is no longer pending
-    if (updated.status !== "pending") {
-      console.log("⛔ Emergency state changed, stopping.");
-      return;
-    }
-
-    // If 5 seconds passed → move to next priority
-    updated.currentPriorityIndex++;
-
-    await db.update({
-      currentPriorityIndex: updated.currentPriorityIndex,
-    });
-
-    console.log("⏭ Moving to next priority:", updated.currentPriorityIndex);
-
-    cascadeToNext(emergencyId, updated);
-
-  }, 10000);
+  return res.json({ ok: true });
 }
 
+export async function rejectEmergency(req, res) {
+  const { id } = req.params;
+  const db = admin.database().ref("emergencies/" + id);
+
+  const snap = await db.get();
+  const emergency = snap.val();
+
+  // increment priority index
+  emergency.currentPriorityIndex++;
+
+  await db.update({
+    currentPriorityIndex: emergency.currentPriorityIndex
+  });
+
+  console.log("❌ Helper rejected, moving to next...");
+
+  // continue cascade
+  cascadeToNext(id, emergency);
+
+  return res.json({ ok: true });
 }
+
