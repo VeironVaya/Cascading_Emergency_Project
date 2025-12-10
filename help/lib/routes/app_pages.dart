@@ -1,10 +1,14 @@
 import 'package:get/get.dart';
+import 'package:project_hellping/modules/handleEmergency/handle_emergency_binding.dart';
+import 'package:project_hellping/modules/handleEmergency/handle_emergency_view.dart';
 
 import 'package:project_hellping/modules/home/home_binding.dart';
 import 'package:project_hellping/modules/home/home_view.dart';
 
 import 'package:project_hellping/modules/priority/priority_binding.dart';
 import 'package:project_hellping/modules/priority/priority_view.dart';
+import 'package:project_hellping/modules/profile/profile_binding.dart';
+import 'package:project_hellping/modules/profile/profile_view.dart';
 
 import '../modules/auth/login/login_binding.dart';
 import '../modules/auth/login/login_view.dart';
@@ -52,13 +56,23 @@ class AppPages {
     // ),
     GetPage(
       name: AppRoutes.GROUP_DETAIL,
-      page: () => const GroupDetailView(),
+      page: () => GroupDetailView(),
       binding: GroupDetailBinding(),
     ),
     GetPage(
       name: AppRoutes.PRIORITY,
       page: () => const PriorityView(),
       binding: PriorityBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.PROFILE,
+      page: () => ProfileView(),
+      binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.HANDLE_EMERGENCY,
+      page: () => HandleEmergencyView(),
+      binding: HandleEmergencyBinding(),
     ),
   ];
 }

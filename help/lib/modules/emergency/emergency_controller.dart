@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:project_hellping/main.dart';
 import '../priority/priority_controller.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,6 +15,7 @@ class EmergencyController extends GetxController {
   final auth = FirebaseAuth.instance;
   final db = FirebaseDatabase.instance.ref();
   final priorityController = Get.find<PriorityController>();
+  var isEmergencyActive = false.obs;
 
   // ====== FCM & Local Notifications ======
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
@@ -144,7 +144,7 @@ class EmergencyController extends GetxController {
 
       // === Send to backend ===
       final res = await http.post(
-        Uri.parse("http://192.168.1.77:5000/emergency"), // Android emulator
+        Uri.parse("http://192.168.1.21:5000/emergency"), // Android emulator
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -169,7 +169,7 @@ class EmergencyController extends GetxController {
   // ========== ACCEPT EMERGENCY ==========
   Future<void> acceptEmergency(String emergencyId) async {
     final res = await http.post(
-      Uri.parse("http://192.168.1.77:5000/emergency/$emergencyId/accept"),
+      Uri.parse("http://192.168.1.21:5000/emergency/$emergencyId/accept"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "123456",
@@ -182,7 +182,7 @@ class EmergencyController extends GetxController {
 // ========== REJECT EMERGENCY ==========
   Future<void> rejectEmergency(String emergencyId) async {
     final res = await http.post(
-      Uri.parse("http://192.168.1.77:5000/emergency/$emergencyId/reject"),
+      Uri.parse("http://192.168.1.21:5000/emergency/$emergencyId/reject"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "123456",

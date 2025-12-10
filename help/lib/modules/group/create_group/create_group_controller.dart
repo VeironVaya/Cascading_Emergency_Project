@@ -47,7 +47,7 @@ class CreateGroupController extends GetxController {
       Get.snackbar("Sukses", "Group dibuat. Kode: $code");
 
       Get.offAllNamed(
-        AppRoutes.GROUP_DETAIL,
+        AppRoutes.HOME,
         arguments: {"groupId": newGroupRef.key},
       );
     } catch (e) {

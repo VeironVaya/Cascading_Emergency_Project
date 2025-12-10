@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
 import 'package:project_hellping/modules/auth/login/login_controller.dart';
+import 'package:project_hellping/modules/home/sos_controller.dart';
 import 'package:project_hellping/widgets/emergency_button.dart';
+import 'package:project_hellping/widgets/floating_navbar.dart';
 import 'home_controller.dart';
 import '../../widgets/menu_container.dart';
 import '../../routes/app_routes.dart';
@@ -13,126 +14,211 @@ class HomePage extends GetView<HomeController> {
   @override
   Widget build(BuildContext context) {
     final loginController = Get.find<LoginController>();
+    final homeController = Get.put(HomeController());
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Home"),
+        backgroundColor: const Color(0xFF7480C9),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: 0,
+        title: Row(
+          children: [
+            const SizedBox(width: 16),
+            GestureDetector(
+              onTap: () => Get.toNamed(AppRoutes.PROFILE),
+              child: Container(
+                width: 45,
+                height: 45,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: const Icon(Icons.person, color: Colors.grey, size: 28),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Obx(() {
+                final location = homeController.currentLocation.value;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      "Lokasi Terkini",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      location?['street'] ?? "Sedang mengambil lokasi...",
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: Colors.white,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                );
+              }),
+            ),
+          ],
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+            color: Colors.white,
             onPressed: () async {
               await loginController.logout();
             },
           ),
         ],
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
-            EmergencyButtonWidget(
-              type: 'red',
-              color: Colors.red,
-              label: 'Red Emergency',
-            ),
-            const SizedBox(height: 20),
-            MenuContainer(
-              title: "Main Menu",
-              items: [
-                MenuItem(
-                  title: "Create Group",
-                  route: AppRoutes.CREATE_GROUP,
-                  icon: Icons.group_add,
-                ),
-                MenuItem(
-                  title: "Join Group",
-                  route: AppRoutes.JOIN_GROUP,
-                  icon: Icons.group,
-                ),
-                MenuItem(
-                  title: "Priority Settings",
-                  route: AppRoutes.PRIORITY,
-                  icon: Icons.star,
-                ),
-              ],
-            ),
-            ElevatedButton(
-              onPressed: () {
-                _showTestNotification();
-              },
-              child: const Text("Test Push Notification"),
-            ),
-            const SizedBox(height: 24),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                "My Groups",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+      body: Stack(children: [
+        Container(
+          color: const Color(0xFFF5F6F7),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 10),
+                Obx(() {
+                  final c = controller;
+                  final sos = Get.find<SosController>();
 
-                if (controller.groups.isEmpty) {
-                  return const Center(
-                      child: Text("Belum bergabung di group manapun"));
-                }
+                  if (sos.isSosActive.value) {
+                    return const SizedBox.shrink();
+                  }
 
-                return ListView.builder(
-                  itemCount: controller.groups.length,
-                  itemBuilder: (context, index) {
-                    final group = controller.groups[index];
+                  String greetingByTime() {
+                    final hour = DateTime.now().hour;
 
+                    if (hour >= 4 && hour < 11) return "pagi hari";
+                    if (hour >= 11 && hour < 15) return "siang hari";
+                    if (hour >= 15 && hour < 18) return "sore hari";
+                    return "malam hari";
+                  }
+
+                  if (c.needsToAskCondition.value) {
                     return Card(
-                      child: ListTile(
-                        title: Text(group["name"] ?? "Unknown"),
-                        subtitle: Text("Kode: ${group["code"]}"),
-                        onTap: () {
-                          Get.toNamed(
-                            AppRoutes.GROUP_DETAIL,
-                            arguments: {
-                              "groupId": group["id"],
-                            },
-                          );
-                        },
+                      color: Colors.white,
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16)),
+                      elevation: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Bagaimana kondisi kamu ${greetingByTime()} ini?",
+                              style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _emojiItem("😀", "sangat baik"),
+                                _emojiItem("🙂", "baik"),
+                                _emojiItem("😐", "biasa saja"),
+                                _emojiItem("🙁", "kurang baik"),
+                                _emojiItem("😢", "sedih"),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
-                  },
-                );
-              }),
+                  }
+
+                  // CASE 2 → Sudah menjawab
+                  return Card(
+                    color: Colors.blue.shade50,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    elevation: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Row(
+                        children: [
+                          Text(
+                            _emojiFromCondition(c.dailyCondition.value),
+                            style: const TextStyle(fontSize: 40),
+                          ),
+                          const SizedBox(width: 16),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                "Kondisi kamu hari ini:",
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              Text(
+                                c.dailyCondition.value ?? "-",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                  );
+                }),
+                const SizedBox(height: 20),
+                EmergencyButtonWidget(),
+                const SizedBox(height: 24),
+              ],
             ),
-          ],
+          ),
+        ),
+        const FloatingNavbar(activeRoute: AppRoutes.HOME),
+      ]),
+    );
+  }
+
+  Widget _emojiItem(String emoji, String moodValue) {
+    return InkWell(
+      onTap: () => controller.saveDailyCondition(moodValue),
+      borderRadius: BorderRadius.circular(40),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.grey.shade200,
+        ),
+        child: Text(
+          emoji,
+          style: const TextStyle(fontSize: 28),
         ),
       ),
     );
   }
 
-  void _showTestNotification() {
-    // Menggunakan flutter_local_notifications untuk simulasi
-    final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-        FlutterLocalNotificationsPlugin();
-
-    const AndroidNotificationDetails androidDetails =
-        AndroidNotificationDetails(
-      'test_channel',
-      'Test Channel',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-
-    const NotificationDetails notificationDetails =
-        NotificationDetails(android: androidDetails);
-
-    flutterLocalNotificationsPlugin.show(
-      0,
-      "Test Notification",
-      "Ini adalah push test!",
-      notificationDetails,
-    );
+  String _emojiFromCondition(String? condition) {
+    switch (condition) {
+      case "sangat baik":
+        return "😀";
+      case "baik":
+        return "🙂";
+      case "biasa saja":
+        return "😐";
+      case "kurang baik":
+        return "🙁";
+      case "sedih":
+        return "😢";
+      default:
+        return "😐";
+    }
   }
 }

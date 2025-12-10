@@ -15,6 +15,9 @@ xmlns:tools="http://schemas.android.com/tools">
         android:usesCleartextTraffic="true"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+          <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyADYUGaqddHegdvJNT7BgOIvh-IaMSm5IA" />
         <service android:name="com.dexterous.flutterlocalnotifications.FlutterLocalNotificationsService" android:exported="false"/>
         <activity
             android:name=".MainActivity"
