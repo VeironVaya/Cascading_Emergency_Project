@@ -23,10 +23,6 @@ class PriorityController extends GetxController {
     fetchPriorities();
   }
 
-  // =====================================================
-  // =============== FETCH PRIORITIES ====================
-  // =====================================================
-
   void fetchPriorities() {
     final uid = auth.currentUser!.uid;
 
@@ -55,10 +51,6 @@ class PriorityController extends GetxController {
           .sort((a, b) => a['priorityLevel'].compareTo(b['priorityLevel']));
     });
   }
-
-  // =====================================================
-  // ================= ADD PRIORITY ======================
-  // =====================================================
 
   Future<void> addPriority() async {
     if (searchUsername.value.isEmpty) {
@@ -212,5 +204,19 @@ class PriorityController extends GetxController {
     }
 
     selectedIds.clear();
+  }
+
+  Future<void> removeHelperFromOtherUser(
+      String ownerUid, String helperUid) async {
+    final snap = await db.child("users/$ownerUid/priorities").get();
+    if (!snap.exists) return;
+
+    for (var child in snap.children) {
+      final data = Map<String, dynamic>.from(child.value as Map);
+      if (data['targetUid'] == helperUid) {
+        await db.child("users/$ownerUid/priorities/${child.key}").remove();
+        break;
+      }
+    }
   }
 }

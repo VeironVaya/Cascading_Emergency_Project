@@ -5,7 +5,6 @@ import 'package:project_hellping/modules/home/sos_controller.dart';
 import 'package:project_hellping/widgets/emergency_button.dart';
 import 'package:project_hellping/widgets/floating_navbar.dart';
 import 'home_controller.dart';
-import '../../widgets/menu_container.dart';
 import '../../routes/app_routes.dart';
 
 class HomePage extends GetView<HomeController> {
@@ -68,15 +67,6 @@ class HomePage extends GetView<HomeController> {
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            color: Colors.white,
-            onPressed: () async {
-              await loginController.logout();
-            },
-          ),
-        ],
       ),
       body: Stack(children: [
         Container(

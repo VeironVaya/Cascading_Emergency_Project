@@ -1,39 +1,97 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'create_group_controller.dart';
-import '../../../widgets/primary_button.dart';
+import 'package:project_hellping/modules/group/create_group/group_controller.dart';
+import 'package:project_hellping/widgets/floating_navbar.dart';
+import 'package:project_hellping/routes/app_routes.dart';
 
-class CreateGroupView extends GetView<CreateGroupController> {
-  const CreateGroupView({super.key});
+class CreateGroupView extends StatelessWidget {
+  final GroupController controller = Get.put(GroupController());
+
   @override
   Widget build(BuildContext context) {
-    final c = controller;
     return Scaffold(
-      appBar: AppBar(title: const Text('Buat Group'), actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-            Get.offAllNamed('/login');
-          },
-        )
-      ]),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF7480C9),
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        titleSpacing: 0,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.arrow_back, color: Colors.white),
+              onPressed: () => Get.back(),
+            ),
+            const SizedBox(width: 6),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Create Group",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(children: [
-          TextField(
-              onChanged: (v) => c.name.value = v,
-              decoration: const InputDecoration(labelText: 'Nama Group')),
-          const SizedBox(height: 12),
-          Obx(() => c.isLoading.value
-              ? const CircularProgressIndicator()
-              : PrimaryButton(label: 'Buat Group', onPressed: c.create)),
-          const SizedBox(height: 12),
-          TextButton(
-              onPressed: () => Get.toNamed('/join-group'),
-              child: const Text('Atau gabung ke group')),
-        ]),
+        padding: const EdgeInsets.all(16.0),
+        child: Obx(() {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                "Nama Grup",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+
+              // INPUT TEXTFIELD
+              TextField(
+                onChanged: (value) => controller.name.value = value,
+                decoration: InputDecoration(
+                  hintText: "Masukkan nama grup...",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // BUTTON CREATE GROUP
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed:
+                      controller.isLoading.value ? null : controller.create,
+                  child: controller.isLoading.value
+                      ? const SizedBox(
+                          height: 22,
+                          width: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Text("CREATE GROUP"),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+      bottomNavigationBar: const Padding(
+        padding: EdgeInsets.all(16),
+        child: FloatingNavbar(
+          activeRoute: AppRoutes.USER_GROUP,
+        ),
       ),
     );
   }

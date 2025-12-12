@@ -8,4 +8,6 @@ abstract class AppRoutes {
   static const PRIORITY = '/priority';
   static const PROFILE = '/profile';
   static const HANDLE_EMERGENCY = '/handle-emergency';
+  static const GROUP_GALLERY = '/group-gallery';
+  static const USER_GROUP = '/user-group';
 }

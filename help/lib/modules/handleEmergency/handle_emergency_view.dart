@@ -423,9 +423,7 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
 
                     const SizedBox(height: 20),
 
-                    // =========================
-                    // BUTTON OPEN IN MAPS
-                    // =========================
+
                     Center(
                       child: ElevatedButton.icon(
                         onPressed: () async {
@@ -449,9 +447,6 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
 
                     const SizedBox(height: 30),
 
-                    // =========================
-                    // BUTTON COMPLETE EMERGENCY
-                    // =========================
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(

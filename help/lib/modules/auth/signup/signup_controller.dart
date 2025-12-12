@@ -5,6 +5,7 @@ import '../../../../routes/app_routes.dart';
 
 class SignupController extends GetxController {
   var usernameC = ''.obs;
+  var nameC = ''.obs;
   var ageC = ''.obs;
   var addressC = ''.obs;
   var medicalHistoryC = ''.obs;
@@ -13,12 +14,13 @@ class SignupController extends GetxController {
   var isLoading = false.obs;
 
   Future<void> signup() async {
-    if (usernameC.isEmpty ||
+    if (emailC.isEmpty ||
+        passC.isEmpty ||
+        usernameC.isEmpty ||
+        nameC.isEmpty ||
         ageC.isEmpty ||
         addressC.isEmpty ||
-        medicalHistoryC.isEmpty ||
-        emailC.isEmpty ||
-        passC.isEmpty) {
+        medicalHistoryC.isEmpty) {
       Get.snackbar('Error', 'Email dan password harus diisi');
       return;
     }
@@ -29,6 +31,7 @@ class SignupController extends GetxController {
         email: emailC.value,
         password: passC.value,
         username: usernameC.value,
+        name: nameC.value,
         age: int.parse(ageC.value),
         address: addressC.value,
         medicalHistory: medicalHistoryC.value,

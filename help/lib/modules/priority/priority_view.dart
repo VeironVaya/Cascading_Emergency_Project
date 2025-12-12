@@ -58,9 +58,7 @@ class PriorityView extends GetView<PriorityController> {
         padding: const EdgeInsets.all(16),
         child: Obx(() {
           if (c.isAddMode.value) {
-            // ============================
-            // MODE ADD KONTAK
-            // ============================
+
             return Column(
               children: [
                 // Search bar untuk mencari username
@@ -246,9 +244,6 @@ class PriorityView extends GetView<PriorityController> {
   }
 }
 
-// ======================================================================
-//                          PRIORITY ITEM WIDGET
-// ======================================================================
 Widget _buildPriorityItem({
   required int index,
   required String id,
@@ -268,12 +263,14 @@ Widget _buildPriorityItem({
         margin: const EdgeInsets.only(right: 14),
         width: 45,
         height: 44,
-        child: ClipRRect(
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
           borderRadius: BorderRadius.circular(12),
-          child: Image.network(
-            avatar,
-            fit: BoxFit.cover,
-          ),
+        ),
+        child: const Icon(
+          Icons.person_rounded,
+          color: Colors.white,
+          size: 28,
         ),
       ),
 

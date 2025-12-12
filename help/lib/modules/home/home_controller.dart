@@ -7,6 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:project_hellping/modules/emergency/emergency_controller.dart';
 import 'package:project_hellping/routes/app_routes.dart';
 import '../../services/firebase_auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class HomeController extends GetxController {
   final groups = <Map>[].obs;
@@ -14,6 +15,7 @@ class HomeController extends GetxController {
   var currentLocation = Rx<Map<String, dynamic>?>(null);
   final dailyCondition = RxnString(); // kondisi hari ini
   final needsToAskCondition = true.obs; // apakah perlu tanya mood
+  final auth = FirebaseAuth.instance;
 
   final EmergencyController emergencyC = Get.find<EmergencyController>();
 
@@ -73,9 +75,6 @@ class HomeController extends GetxController {
     final title = "SOS! ($condition)";
     final body = "$senderName membutuhkan $need";
 
-    // =====================================================
-    //     SHOW CUSTOM DIALOG (TANPA UBAH LOGIC)
-    // =====================================================
     Get.dialog(
       Material(
         color: Colors.black.withOpacity(0.4),
@@ -195,9 +194,31 @@ class HomeController extends GetxController {
                   children: [
                     // ------ BUTTON TIDAK ------
                     GestureDetector(
-                      onTap: () {
-                        emergencyC.rejectEmergency(emergencyId);
+                      onTap: () async {
                         Get.back();
+
+                        // Tanyakan apakah mengenal user yang mengirim emergency
+                        final know = await Get.defaultDialog<bool>(
+                          title: "Konfirmasi",
+                          middleText: "Apakah kamu mengenal $senderName?",
+                          textCancel: "Tidak",
+                          textConfirm: "Ya",
+                          onConfirm: () => Get.back(result: true),
+                          onCancel: () => Get.back(result: false),
+                        );
+
+                        if (know == false) {
+                          // Hapus helper dari priority list pengirim emergency
+                          emergencyC.priorityController
+                              .removeHelperFromOtherUser(
+                                  senderUid, auth.currentUser!.uid);
+
+                          Get.snackbar("Info",
+                              "Kamu dihapus dari priority list $senderName");
+                        }
+
+                        // Kirim reject ke backend
+                        emergencyC.rejectEmergency(emergencyId);
                       },
                       child: Container(
                         width: 107,
