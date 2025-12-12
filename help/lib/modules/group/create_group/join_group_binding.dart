@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
-import 'group_controller.dart';
+import 'package:project_hellping/modules/group/create_group/group_controller.dart';
 
-class CreateGroupBinding extends Bindings {
+class JoinGroupBinding extends Bindings {
   @override
   void dependencies() {
     Get.lazyPut<GroupController>(() => GroupController());
