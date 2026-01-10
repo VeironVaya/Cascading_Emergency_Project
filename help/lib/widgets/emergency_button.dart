@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:project_hellping/modules/emergency/emergency_controller.dart';
 import 'package:project_hellping/modules/home/sos_controller.dart';
@@ -113,20 +115,25 @@ class EmergencyButtonWidget extends StatelessWidget {
                       runSpacing: 12,
                       children: [
                         _OptionIcon(
-                            icon: Icons.local_hospital,
-                            label: "Rumah Sakit",
-                            selected: needC,
-                            iconBackgroundColor: Colors.red),
+                          icon: 'assets/icons/noto--ambulance.svg',
+                          label: "Rumah Sakit",
+                          selected: needC,
+                          iconBackgroundColor: Colors.red,
+                          isSvgUrl: true, // tetap true karena SVG
+                        ),
                         _OptionIcon(
-                            icon: Icons.local_police,
-                            label: "Polisi",
-                            selected: needC,
-                            iconBackgroundColor: Colors.blue),
+                          icon: 'assets/icons/twemoji--police-officer.svg',
+                          label: "Polisi",
+                          selected: needC,
+                          iconBackgroundColor: Colors.blue,
+                          isSvgUrl: true,
+                        ),
                         _OptionIcon(
-                            icon: Icons.fire_truck,
-                            label: "Pemadam",
-                            selected: needC,
-                            iconBackgroundColor: Colors.orange),
+                          icon: 'assets/icons/openmoji--firefighter.svg',
+                          label: "Pemadam",
+                          selected: needC,
+                          isSvgUrl: true,
+                        ),
                       ],
                     ),
                     const SizedBox(height: 20),
@@ -350,11 +357,12 @@ class EmergencyButtonWidget extends StatelessWidget {
 }
 
 class _OptionIcon extends StatelessWidget {
-  final IconData icon;
+  final dynamic icon; // IconData, String (URL SVG, Base64 SVG, atau iconify)
   final String label;
   final RxString selected;
   final bool isCondition; // true kalau horizontal
   final Color? iconBackgroundColor;
+  final bool isSvgUrl; // true jika icon adalah URL SVG atau Base64 SVG
 
   const _OptionIcon({
     required this.icon,
@@ -362,7 +370,37 @@ class _OptionIcon extends StatelessWidget {
     required this.selected,
     this.isCondition = false,
     this.iconBackgroundColor,
+    this.isSvgUrl = false,
   });
+
+  // Helper method untuk load SVG dari berbagai source
+  Widget _buildSvgIcon(String iconSource, {Color? color}) {
+    try {
+      if (iconSource.startsWith('http')) {
+        return SvgPicture.network(
+          iconSource,
+          colorFilter:
+              color == null ? null : ColorFilter.mode(color, BlendMode.srcIn),
+        );
+      } else if (iconSource.startsWith('data:image/svg+xml;base64,')) {
+        final base64Data =
+            iconSource.replaceFirst('data:image/svg+xml;base64,', '');
+        return SvgPicture.string(
+          utf8.decode(base64Decode(base64Data)),
+          colorFilter:
+              color == null ? null : ColorFilter.mode(color, BlendMode.srcIn),
+        );
+      } else {
+        return SvgPicture.asset(
+          iconSource,
+          colorFilter:
+              color == null ? null : ColorFilter.mode(color, BlendMode.srcIn),
+        );
+      }
+    } catch (e) {
+      return const Icon(Icons.error, size: 50);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -379,39 +417,49 @@ class _OptionIcon extends StatelessWidget {
       }
 
       if (isCondition) {
-        // STYLE HORIZONTAL
+        // STYLE HORIZONTAL - WRAPPING LAYOUT
         return GestureDetector(
           onTap: handleTap,
           child: Container(
-            width: 105,
-            height: 42,
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(20),
               border: Border.all(
                 color: isSelected ? Colors.purple : const Color(0x72BBBBBB),
-                width: 1,
+                width: 1.5,
               ),
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                const SizedBox(width: 8),
                 Container(
-                  width: 28,
-                  height: 28,
+                  width: 32,
+                  height: 32,
                   decoration: ShapeDecoration(
                     color: iconBackgroundColor ?? const Color(0xFFF69EA0),
                     shape: const OvalBorder(),
                   ),
-                  child: Icon(icon, size: 16, color: Colors.white),
+                  child: isSvgUrl
+                      ? SvgPicture.network(
+                          icon as String,
+                          width: 18,
+                          height: 18,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        )
+                      : Icon(icon as IconData, size: 18, color: Colors.white),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   label,
                   style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
                     fontFamily: 'Poppins',
+                    color: Colors.black,
                   ),
                 ),
               ],
@@ -420,68 +468,51 @@ class _OptionIcon extends StatelessWidget {
         );
       }
 
-      // STYLE KOTAK BESAR
+      // STYLE KOTAK BESAR - FULL CENTERED (tanpa background icon)
       return GestureDetector(
         onTap: handleTap,
         child: Container(
-          width: 89,
-          height: 89,
+          width: 95,
+          height: 110,
           clipBehavior: Clip.antiAlias,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? Colors.purple : const Color(0x72BBBBBB),
-              width: 1,
+              color: isSelected ? Colors.purple : const Color(0xFFDDDDDD),
+              width: 1.5,
             ),
           ),
-          child: Stack(
-            alignment: Alignment.center,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon bulat
-              Align(
-                alignment: Alignment.center,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double iconSize = constraints.maxWidth * 0.50;
-                    double iconRadius = iconSize / 2;
-                    return Container(
-                      width: iconSize,
-                      height: iconSize,
-                      decoration: BoxDecoration(
-                        color: iconBackgroundColor ??
-                            (isSelected
-                                ? Colors.purple
-                                : const Color(0xFFF5F5F5)),
-                        shape: BoxShape.circle,
+              // Icon dari SVG URL atau Flutter Icon
+              isSvgUrl
+                  ? SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: _buildSvgIcon(
+                        icon as String,
                       ),
-                      child: Icon(icon, size: iconRadius, color: Colors.white),
-                    );
-                  },
-                ),
-              ),
-
+                    )
+                  : Icon(
+                      icon as IconData,
+                      size: 50,
+                    ),
+              const SizedBox(height: 8),
               // Label
-              Positioned(
-                bottom: 0,
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double fontSize = constraints.maxWidth * 0.030;
-                    return SizedBox(
-                      width: 67,
-                      child: Text(
-                        label,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: fontSize.clamp(8, 10),
-                          fontFamily: 'Poppins',
-                          fontWeight: FontWeight.w500,
-                          height: 1,
-                        ),
-                      ),
-                    );
-                  },
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6),
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 11,
+                    fontFamily: 'Poppins',
+                    fontWeight: FontWeight.w500,
+                    height: 1.2,
+                  ),
                 ),
               ),
             ],

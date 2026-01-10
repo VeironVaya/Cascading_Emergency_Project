@@ -166,18 +166,22 @@ class PriorityController extends GetxController {
 
   Future<void> reorderPriority(int oldIndex, int newIndex) async {
     final uid = auth.currentUser!.uid;
+    if (newIndex > oldIndex) newIndex--;
 
-    if (newIndex > oldIndex) newIndex -= 1;
+    // COPY list, JANGAN mutate priorityList langsung
+    final newList = List<Map<String, dynamic>>.from(priorityList);
 
-    final item = priorityList.removeAt(oldIndex);
-    priorityList.insert(newIndex, item);
+    final item = newList.removeAt(oldIndex);
+    newList.insert(newIndex, item);
 
+    final updates = <String, dynamic>{};
     int i = 1;
-    for (var p in priorityList) {
-      await db.child("users/$uid/priorities/${p['id']}/priorityLevel").set(i);
-      p['priorityLevel'] = i;
+    for (var p in newList) {
+      updates["users/$uid/priorities/${p['id']}/priorityLevel"] = i;
       i++;
     }
+
+    await db.update(updates);
   }
 
   // =====================================================

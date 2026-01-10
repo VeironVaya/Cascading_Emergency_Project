@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
 import '../priority/priority_controller.dart';
@@ -144,7 +146,7 @@ class EmergencyController extends GetxController {
 
       // === Send to backend ===
       final res = await http.post(
-        Uri.parse("http://192.168.18.120:5000/emergency"), // Android emulator
+        Uri.parse("http://192.168.1.45:5000/emergency"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -155,7 +157,17 @@ class EmergencyController extends GetxController {
       print("Backend response: ${res.body}");
 
       if (res.statusCode == 200) {
-        Get.snackbar("Success", "Emergency sent!");
+        // Tampilkan dialog SOS Success menggunakan Get.dialog
+        Get.dialog(
+          SOSSuccessDialog(
+            onClose: () {
+              Get.back(); // Tutup dialog
+              // Opsional: Kembali ke halaman sebelumnya
+              // Get.back(); // Uncomment jika ingin auto back
+            },
+          ),
+          barrierDismissible: false, // Dialog hanya bisa ditutup dengan tombol
+        );
       } else {
         Get.snackbar("Error", "Backend error: ${res.body}");
       }
@@ -169,7 +181,7 @@ class EmergencyController extends GetxController {
   // ========== ACCEPT EMERGENCY ==========
   Future<void> acceptEmergency(String emergencyId) async {
     final res = await http.post(
-      Uri.parse("http://192.168.18.120:5000/emergency/$emergencyId/accept"),
+      Uri.parse("http://192.168.1.45:5000/emergency/$emergencyId/accept"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "123456",
@@ -185,7 +197,7 @@ class EmergencyController extends GetxController {
   }) async {
     try {
       final res = await http.post(
-        Uri.parse("http://192.168.18.120:5000/emergency/$emergencyId/reject"),
+        Uri.parse("http://192.168.1.45:5000/emergency/$emergencyId/reject"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -217,5 +229,140 @@ class EmergencyController extends GetxController {
     } catch (e) {
       print("Reject emergency error: $e");
     }
+  }
+}
+
+class SOSSuccessDialog extends StatelessWidget {
+  final VoidCallback? onClose;
+
+  const SOSSuccessDialog({
+    Key? key,
+    this.onClose,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(32),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Title
+            const Text(
+              'SOS terkirim',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF2D3E6F),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Illustration
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: const Color(0xFF2D3E6F),
+                borderRadius: BorderRadius.circular(60),
+              ),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Phone illustration
+                  Container(
+                    width: 60,
+                    height: 90,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E7FE8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Center(
+                      child: Icon(
+                        Icons.favorite,
+                        color: Color(0xFFE91E63),
+                        size: 24,
+                      ),
+                    ),
+                  ),
+                  // Megaphone icon positioned at top-left
+                  Positioned(
+                    top: 20,
+                    left: 15,
+                    child: Transform.rotate(
+                      angle: -0.5,
+                      child: const Icon(
+                        Icons.campaign,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Message
+            RichText(
+              textAlign: TextAlign.center,
+              text: const TextSpan(
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color(0xFF2D3E6F),
+                  height: 1.5,
+                ),
+                children: [
+                  TextSpan(text: 'Kami sudah mengirim SOS pada\n'),
+                  TextSpan(
+                    text: 'Kontak Prioritas',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+
+            // Button
+            SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (onClose != null) {
+                    onClose!();
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF5B6FB5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: const Text(
+                  'Keluar',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
