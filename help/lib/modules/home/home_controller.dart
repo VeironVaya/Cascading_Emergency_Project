@@ -137,12 +137,16 @@ class HomeController extends GetxController {
                       height: 52,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: NetworkImage(senderAvatar),
-                          fit: BoxFit.cover,
+                        color: Colors.grey.shade300,
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                          size: 28,
                         ),
                       ),
-                    ),
+                    )
                   ],
                 ),
 
@@ -178,8 +182,6 @@ class HomeController extends GetxController {
                     Expanded(
                       child: GestureDetector(
                         onTap: () async {
-                          Get.back();
-
                           final know = await Get.defaultDialog<bool>(
                             title: "Konfirmasi",
                             middleText: "Apakah kamu mengenal $senderName?",
@@ -190,12 +192,20 @@ class HomeController extends GetxController {
                             onCancel: () => Get.back(result: false),
                           );
 
+                          // Tutup dialog utama SETELAH dialog konfirmasi selesai
+                          Get.back();
+
                           if (know == false) {
                             emergencyC.priorityController
                                 .removeHelperFromOtherUser(
-                                    senderUid, auth.currentUser!.uid);
-                            Get.snackbar("Info",
-                                "Kamu dihapus dari priority list $senderName");
+                              senderUid,
+                              auth.currentUser!.uid,
+                            );
+
+                            Get.snackbar(
+                              "Info",
+                              "Kamu dihapus dari priority list $senderName",
+                            );
                           }
 
                           emergencyC.rejectEmergency(emergencyId);
@@ -207,7 +217,7 @@ class HomeController extends GetxController {
                             border: Border.all(color: Color(0xFFF69EA0)),
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: Center(
+                          child: const Center(
                             child: Text(
                               'Tidak',
                               style: TextStyle(

@@ -517,9 +517,9 @@ String _conditionToEmoji(String condition) {
       return "😄";
     case "baik":
       return "🙂";
-    case "cukup":
+    case "biasa saja":
       return "😐";
-    case "buruk":
+    case "kurang baik":
       return "😟";
     case "sedih":
       return "😢";
@@ -534,11 +534,11 @@ Color _getConditionColor(String condition) {
       return const Color(0xFFD4EDDA);
     case "baik":
       return const Color(0xFFE2F0CB);
-    case "cukup":
+    case "biasa saja":
       return const Color(0xFFFFF3CD);
-    case "buruk":
+    case "kurang baik":
       return const Color(0xFFF8D7DA);
-    case "sangat buruk":
+    case "sedih":
       return const Color(0xFFF5C6CB);
     default:
       return const Color(0xFFE0E0E0);

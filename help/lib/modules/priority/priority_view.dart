@@ -21,7 +21,7 @@ class PriorityView extends GetView<PriorityController> {
         automaticallyImplyLeading: false,
         title: const Text(
           "Kontak",
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
           Obx(() => c.isAddMode.value
@@ -239,7 +239,7 @@ Widget _priorityListMode(PriorityController c) {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search),
+                  const Icon(Icons.search, color: Colors.grey),
                   const SizedBox(width: 6),
                   Expanded(
                     child: TextField(
@@ -254,21 +254,45 @@ Widget _priorityListMode(PriorityController c) {
               ),
             ),
           ),
+
+          /// POPUP MENU
           PopupMenuButton<String>(
+            color: Colors.white, // bg white
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             onSelected: (v) {
               if (v == 'delete') {
                 c.showDeleteMode.value = true;
                 c.showReorderMode.value = false;
                 c.selectedIds.clear();
-              } else {
+              } else if (v == 'priority') {
                 c.showDeleteMode.value = false;
                 c.showReorderMode.value = true;
                 c.selectedIds.clear();
               }
             },
             itemBuilder: (_) => const [
-              PopupMenuItem(value: 'delete', child: Text("Hapus Kontak")),
-              PopupMenuItem(value: 'priority', child: Text("Ubah Priority")),
+              PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete, color: Color(0xFF7480C9)),
+                    SizedBox(width: 10),
+                    Text("Hapus Kontak"),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'priority',
+                child: Row(
+                  children: [
+                    Icon(Icons.swap_vert, color: Color(0xFF7480C9)),
+                    SizedBox(width: 10),
+                    Text("Ubah Priority"),
+                  ],
+                ),
+              ),
             ],
           ),
         ],
@@ -327,7 +351,13 @@ Widget _priorityItem({
           padding: const EdgeInsets.symmetric(vertical: 8),
           child: Row(
             children: [
-              const CircleAvatar(child: Icon(Icons.person)),
+              const CircleAvatar(
+                backgroundColor: Color(0xFFE0E0E0),
+                child: Icon(
+                  Icons.person,
+                  color: Colors.grey,
+                ),
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

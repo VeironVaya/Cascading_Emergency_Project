@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:geocoding/geocoding.dart';
@@ -32,6 +33,12 @@ class HandleEmergencyController extends GetxController {
   // HOSPITALS
   RxList<Map<String, dynamic>> hospitals = <Map<String, dynamic>>[].obs;
   RxBool loadingHospitals = false.obs;
+
+  // UI REPRESENTATION
+  Rx<IconData?> conditionIcon = Rx<IconData?>(null);
+  Rx<Color> conditionColor = Colors.transparent.obs;
+
+  RxString needIconAsset = "".obs;
 
   @override
   void onInit() {
@@ -71,6 +78,8 @@ class HandleEmergencyController extends GetxController {
     status.value = data["status"] ?? "";
     need.value = data["need"] ?? "";
     condition.value = data["condition"] ?? "";
+    updateNeedUI(need.value);
+    updateConditionUI(condition.value);
     createdAt.value = data["createdAt"]?.toString() ?? "";
 
     // SENDER ------------------------------
@@ -190,5 +199,41 @@ class HandleEmergencyController extends GetxController {
     }
 
     loadingHospitals.value = false;
+  }
+
+  void updateConditionUI(String value) {
+    switch (value) {
+      case "Kritis":
+        conditionIcon.value = Icons.warning;
+        conditionColor.value = Colors.red;
+        break;
+      case "Sedang":
+        conditionIcon.value = Icons.info;
+        conditionColor.value = Colors.yellow;
+        break;
+      case "Ringan":
+        conditionIcon.value = Icons.check_circle;
+        conditionColor.value = Colors.green;
+        break;
+      default:
+        conditionIcon.value = null;
+        conditionColor.value = Colors.transparent;
+    }
+  }
+
+  void updateNeedUI(String value) {
+    switch (value) {
+      case "Rumah Sakit":
+        needIconAsset.value = "assets/icons/noto--ambulance.svg";
+        break;
+      case "Polisi":
+        needIconAsset.value = "assets/icons/twemoji--police-officer.svg";
+        break;
+      case "Pemadam":
+        needIconAsset.value = "assets/icons/openmoji--firefighter.svg";
+        break;
+      default:
+        needIconAsset.value = "";
+    }
   }
 }

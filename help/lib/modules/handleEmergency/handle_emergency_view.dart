@@ -5,6 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../routes/app_routes.dart';
 import 'handle_emergency_controller.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class HandleEmergencyView extends GetView<HandleEmergencyController> {
   HandleEmergencyView({super.key});
@@ -53,13 +54,25 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                     )),
 
                 // WAKTU DEFAULT
-                const Text(
-                  "Sejak 20.00",
-                  style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
+                StreamBuilder<DateTime>(
+                  stream: Stream.periodic(
+                    const Duration(minutes: 1),
+                    (_) => DateTime.now(),
                   ),
-                ),
+                  builder: (context, snapshot) {
+                    final now = snapshot.data ?? DateTime.now();
+                    final hour = now.hour.toString().padLeft(2, '0');
+                    final minute = now.minute.toString().padLeft(2, '0');
+
+                    return Text(
+                      "Sejak $hour.$minute",
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 12,
+                      ),
+                    );
+                  },
+                )
               ],
             )
           ],
@@ -148,9 +161,16 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                                       margin: const EdgeInsets.only(right: 11),
                                       width: 53,
                                       height: 53,
-                                      child: Image.network(
-                                        "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/8iRuddPB0k/mi5ux51t_expires_30_days.png",
-                                        fit: BoxFit.fill,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: Colors.grey.shade300,
+                                      ),
+                                      child: const Center(
+                                        child: Icon(
+                                          Icons.person,
+                                          size: 28,
+                                          color: Colors.grey,
+                                        ),
                                       ),
                                     ),
                                     Column(
@@ -169,11 +189,10 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                                             Container(
                                               margin: const EdgeInsets.only(
                                                   right: 5),
-                                              width: 11,
-                                              height: 16,
-                                              child: Image.network(
-                                                "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/8iRuddPB0k/1ih1h6yv_expires_30_days.png",
-                                                fit: BoxFit.fill,
+                                              child: const Icon(
+                                                Icons.location_on,
+                                                size: 16,
+                                                color: Colors.black,
                                               ),
                                             ),
                                             Obx(() => InkWell(
@@ -207,62 +226,69 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                               ),
 
                               // Prioritas / kategori (dynamic: need & condition)
-                              Container(
-                                margin: const EdgeInsets.only(bottom: 11),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment
-                                      .center, // <-- ini buat center
-                                  children: [
-                                    // Need
-                                    Row(
+                              Obx(() => Container(
+                                    margin: const EdgeInsets.only(bottom: 11),
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(right: 5),
-                                          width: 27,
-                                          height: 27,
-                                          child: Image.network(
-                                            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/8iRuddPB0k/8y29hnyy_expires_30_days.png",
-                                            fit: BoxFit.fill,
-                                          ),
+                                        // NEED
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 27,
+                                              height: 27,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: controller.needIconAsset
+                                                      .value.isNotEmpty
+                                                  ? SvgPicture.asset(controller
+                                                      .needIconAsset.value)
+                                                  : const SizedBox(),
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(controller.need.value),
+                                          ],
                                         ),
-                                        Text(
-                                          controller.need
-                                              .value, // Ambulan diganti need
-                                          style: const TextStyle(
-                                            color: Color(0xFF000000),
-                                            fontSize: 12,
-                                          ),
+
+                                        const SizedBox(width: 16),
+
+                                        // CONDITION
+                                        Row(
+                                          children: [
+                                            Container(
+                                              width: 27,
+                                              height: 27,
+                                              decoration: BoxDecoration(
+                                                color: controller
+                                                    .conditionColor.value,
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: controller.conditionIcon
+                                                          .value !=
+                                                      null
+                                                  ? Icon(
+                                                      controller
+                                                          .conditionIcon.value,
+                                                      size: 18,
+                                                      color: Colors.white,
+                                                    )
+                                                  : const SizedBox(),
+                                            ),
+                                            const SizedBox(width: 5),
+                                            Text(
+                                              controller.condition.value,
+                                              style:
+                                                  const TextStyle(fontSize: 12),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
-                                    const SizedBox(width: 16),
-                                    // Condition
-                                    Row(
-                                      children: [
-                                        Container(
-                                          margin:
-                                              const EdgeInsets.only(right: 5),
-                                          width: 27,
-                                          height: 27,
-                                          child: Image.network(
-                                            "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/8iRuddPB0k/kyuhjtgi_expires_30_days.png",
-                                            fit: BoxFit.fill,
-                                          ),
-                                        ),
-                                        Text(
-                                          controller.condition
-                                              .value, // Kesehatan diganti condition
-                                          style: const TextStyle(
-                                            color: Color(0xFF000000),
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                  ))
                             ],
                           ),
                         ),
@@ -376,19 +402,26 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                                                 const EdgeInsets.only(top: 25),
                                             width: 35,
                                             height: 35,
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color:
+                                                  Color(0xFF4A57AB), // bg color
+                                            ),
                                             child: Material(
                                               color: Colors
-                                                  .transparent, // wajib ada Material supaya InkWell hidup
+                                                  .transparent, // wajib agar ripple terlihat
+                                              shape: const CircleBorder(),
                                               child: InkWell(
+                                                customBorder:
+                                                    const CircleBorder(),
                                                 onTap: () async {
-                                                  final number =
-                                                      "6281234567890";
+                                                  final number = "62916451200";
                                                   final message =
                                                       Uri.encodeComponent(
-                                                          ""); // pesan kosong
+                                                          "Halo");
 
                                                   final url = Uri.parse(
-                                                    "https://wa.me/$number?text=$message",
+                                                    "https://api.whatsapp.com/send?phone=$number&text=$message",
                                                   );
 
                                                   if (await canLaunchUrl(url)) {
@@ -398,13 +431,16 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                                                           .externalApplication,
                                                     );
                                                   } else {
-                                                    print(
+                                                    debugPrint(
                                                         "Tidak bisa membuka WA");
                                                   }
                                                 },
-                                                child: Image.network(
-                                                  "https://storage.googleapis.com/tagjs-prod.appspot.com/v1/8iRuddPB0k/3vzeh85e_expires_30_days.png",
-                                                  fit: BoxFit.fill,
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons.phone,
+                                                    color: Colors.white,
+                                                    size: 18,
+                                                  ),
                                                 ),
                                               ),
                                             ),
@@ -423,17 +459,26 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
 
                     const SizedBox(height: 20),
 
-
                     Center(
                       child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.black87,
+                          elevation: 2,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
                         onPressed: () async {
                           final url = controller.mapsUrl.value.isNotEmpty
                               ? controller.mapsUrl.value
                               : "https://www.google.com/maps/search/?api=1&query=${pos.latitude},${pos.longitude}";
 
-                          if (await canLaunchUrl(Uri.parse(url))) {
+                          final uri = Uri.parse(url);
+
+                          if (await canLaunchUrl(uri)) {
                             await launchUrl(
-                              Uri.parse(url),
+                              uri,
                               mode: LaunchMode.externalApplication,
                             );
                           } else {
@@ -450,9 +495,15 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                     Center(
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
+                          backgroundColor:
+                              const Color(0xFF7480C9),
                           padding: const EdgeInsets.symmetric(
-                              vertical: 14, horizontal: 25),
+                            vertical: 14,
+                            horizontal: 25,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
                         ),
                         onPressed: () async {
                           await controller.db
@@ -469,7 +520,10 @@ class HandleEmergencyView extends GetView<HandleEmergencyController> {
                         },
                         child: const Text(
                           "Selesaikan Emergency & Kembali",
-                          style: TextStyle(fontSize: 16, color: Colors.white),
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),

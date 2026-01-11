@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:project_hellping/routes/app_routes.dart';
 import '../priority/priority_controller.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -146,7 +147,7 @@ class EmergencyController extends GetxController {
 
       // === Send to backend ===
       final res = await http.post(
-        Uri.parse("http://192.168.191.70:5000/emergency"),
+        Uri.parse("http://192.168.1.4:5000/emergency"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -181,7 +182,7 @@ class EmergencyController extends GetxController {
   // ========== ACCEPT EMERGENCY ==========
   Future<void> acceptEmergency(String emergencyId) async {
     final res = await http.post(
-      Uri.parse("http://192.168.191.70:5000/emergency/$emergencyId/accept"),
+      Uri.parse("http://192.168.1.4:5000/emergency/$emergencyId/accept"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "123456",
@@ -197,7 +198,7 @@ class EmergencyController extends GetxController {
   }) async {
     try {
       final res = await http.post(
-        Uri.parse("http://192.168.191.70:5000/emergency/$emergencyId/reject"),
+        Uri.parse("http://192.168.1.4:5000/emergency/$emergencyId/reject"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -337,11 +338,7 @@ class SOSSuccessDialog extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  if (onClose != null) {
-                    onClose!();
-                  } else {
-                    Navigator.of(context).pop();
-                  }
+                  Get.offAllNamed(AppRoutes.HOME);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF5B6FB5),
