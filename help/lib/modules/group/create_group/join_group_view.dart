@@ -22,6 +22,7 @@ class JoinGroupView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF7480C9),
@@ -29,54 +30,69 @@ class JoinGroupView extends StatelessWidget {
         automaticallyImplyLeading: false,
         titleSpacing: 0,
         title: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.white),
               onPressed: () => Get.back(),
             ),
             const SizedBox(width: 6),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "Join Group",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            )
+            const Text(
+              "Join Group",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         ),
       ),
-
-      // ===========================
-      // RESPONSIVE BODY
-      // ===========================
       body: LayoutBuilder(
         builder: (context, constraints) {
           double boxSize = constraints.maxWidth * 0.12;
           if (boxSize > 60) boxSize = 60;
 
-          return Padding(
-            padding: const EdgeInsets.all(20),
+          return SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: 20,
+              right: 20,
+              top: 20,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Text(
-                  "Masukkan kode group:",
-                  style: TextStyle(fontSize: 16),
-                ),
-                const SizedBox(height: 30),
+                const SizedBox(height: 20),
 
-                // =======================
-                // RESPONSIVE 6 INPUT BOX
-                // =======================
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                // ===== TITLE =====
+                const Text(
+                  "Masukkan kode",
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // ===== SUBTITLE =====
+                const Text(
+                  "Masukkan kode ajakan Anda\nTips: dapatkan kode dari pembuat Circle",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
+                    height: 1.5,
+                  ),
+                ),
+
+                const SizedBox(height: 40),
+
+                // ===== INPUT KODE (ANTI OVERFLOW) =====
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 12,
+                  runSpacing: 12,
                   children: List.generate(6, (index) {
                     return SizedBox(
                       width: boxSize,
@@ -86,32 +102,36 @@ class JoinGroupView extends StatelessWidget {
                         focusNode: focus[index],
                         textAlign: TextAlign.center,
                         maxLength: 1,
+                        textCapitalization: TextCapitalization.characters,
                         style: TextStyle(
-                          fontSize: boxSize * 0.5,
+                          fontSize: boxSize * 0.45,
                           fontWeight: FontWeight.bold,
                         ),
                         decoration: InputDecoration(
                           counterText: "",
+                          filled: true,
+                          fillColor: Colors.grey[100],
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: const BorderSide(
-                              color: Colors.blue,
+                              color: Color(0xFF7480C9),
                               width: 2,
                             ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide(
-                              color: Colors.grey,
+                              color: Colors.grey[300]!,
                               width: 1.5,
                             ),
                           ),
                         ),
                         onChanged: (value) {
                           final upper = value.toUpperCase();
+
                           inputs[index].value = TextEditingValue(
                             text: upper,
-                            selection: TextSelection.collapsed(offset: 1),
+                            selection: const TextSelection.collapsed(offset: 1),
                           );
 
                           if (upper.isNotEmpty && index < 5) {
@@ -131,42 +151,51 @@ class JoinGroupView extends StatelessWidget {
                   }),
                 ),
 
-                const SizedBox(height: 40),
+                const SizedBox(height: 50),
 
-                Obx(() => SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: controller.code.value.length == 6 &&
-                                !controller.isLoading.value
-                            ? controller.joinGroupNow
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
+                // ===== JOIN BUTTON =====
+                Obx(
+                  () => SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: controller.code.value.length == 6 &&
+                              !controller.isLoading.value
+                          ? controller.joinGroupNow
+                          : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF5B6BB1),
+                        disabledBackgroundColor: Colors.grey[300],
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
                         ),
-                        child: controller.isLoading.value
-                            ? const SizedBox(
-                                height: 22,
-                                width: 22,
-                                child: CircularProgressIndicator(
-                                  color: Colors.white,
-                                  strokeWidth: 2,
-                                ),
-                              )
-                            : const Text(
-                                "Join Group",
-                                style: TextStyle(fontSize: 16),
-                              ),
+                        elevation: 2,
                       ),
-                    )),
+                      child: controller.isLoading.value
+                          ? const SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
+                            )
+                          : const Text(
+                              "Kirim",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                ),
               ],
             ),
           );
         },
       ),
-
       bottomNavigationBar: const Padding(
         padding: EdgeInsets.all(16),
         child: FloatingNavbar(

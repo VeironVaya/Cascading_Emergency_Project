@@ -1,5 +1,7 @@
 import 'package:get/get.dart';
 import 'package:project_hellping/modules/group/create_group/create_group_view.dart';
+import 'package:project_hellping/modules/group/create_group/delete_circle_view.dart';
+import 'package:project_hellping/modules/group/create_group/invite_code_view.dart';
 import 'package:project_hellping/modules/group/create_group/user_group_binding.dart';
 
 import 'package:project_hellping/modules/group/create_group/join_group_binding.dart';
@@ -80,6 +82,16 @@ class AppPages {
       name: AppRoutes.HANDLE_EMERGENCY,
       page: () => HandleEmergencyView(),
       binding: HandleEmergencyBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.DELETE_CIRCLE,
+      page: () => DeleteCircleView(),
+      binding: GroupDetailBinding(),
+    ),
+    GetPage(
+      name: AppRoutes.INVITE_CODE,
+      page: () => InviteCodeView(),
+      binding: GroupDetailBinding(),
     ),
   ];
 }

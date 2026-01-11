@@ -17,8 +17,10 @@ class EmergencyButtonWidget extends StatelessWidget {
     final conditionC = ''.obs;
     final showFields = false.obs;
     final countdown = 0.obs;
-    final dragPosition = 0.0.obs; // posisi slider dari kanan
+    final dragPosition = 0.0.obs;
+    final holdProgress = 0.0.obs; // Progress untuk 3 detik hold
     Timer? timer;
+    Timer? holdTimer;
 
     void sendEmergencyAuto() {
       controller.sendEmergency(
@@ -33,14 +35,18 @@ class EmergencyButtonWidget extends StatelessWidget {
       showFields.value = false;
       countdown.value = 0;
       dragPosition.value = 0.0;
+      holdProgress.value = 0.0;
       timer?.cancel();
+      holdTimer?.cancel();
     }
 
     void cancelEmergency() {
       timer?.cancel();
+      holdTimer?.cancel();
       showFields.value = false;
       countdown.value = 0;
       dragPosition.value = 0.0;
+      holdProgress.value = 0.0;
       Get.snackbar("Dibatalkan", "Emergency dibatalkan",
           snackPosition: SnackPosition.BOTTOM);
     }
@@ -60,6 +66,25 @@ class EmergencyButtonWidget extends StatelessWidget {
           }
         });
       }
+    }
+
+    void startHoldTimer() {
+      holdProgress.value = 0.0;
+      holdTimer = Timer.periodic(const Duration(milliseconds: 30), (t) {
+        holdProgress.value += 0.03 / 3.0; // 3 detik = 3000ms
+        if (holdProgress.value >= 1.0) {
+          holdProgress.value = 1.0;
+          holdTimer?.cancel();
+          sos.startSos();
+          onEmergencyPressed();
+          controller.isEmergencyActive.value = true;
+        }
+      });
+    }
+
+    void stopHoldTimer() {
+      holdTimer?.cancel();
+      holdProgress.value = 0.0;
     }
 
     const double sliderWidth = 50;
@@ -119,7 +144,7 @@ class EmergencyButtonWidget extends StatelessWidget {
                           label: "Rumah Sakit",
                           selected: needC,
                           iconBackgroundColor: Colors.red,
-                          isSvgUrl: true, // tetap true karena SVG
+                          isSvgUrl: true,
                         ),
                         _OptionIcon(
                           icon: 'assets/icons/twemoji--police-officer.svg',
@@ -153,10 +178,9 @@ class EmergencyButtonWidget extends StatelessWidget {
                 children: [
                   if (!sos.isSosActive.value && countdown.value == 0)
                     Align(
-                      alignment: Alignment.topLeft, // <<< bikin ke kiri page
+                      alignment: Alignment.topLeft,
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment
-                            .start, // <<< bikin teks rata kiri
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: const [
                           Text(
                             "Apakah kamu dalam keadaan darurat?",
@@ -167,7 +191,7 @@ class EmergencyButtonWidget extends StatelessWidget {
                           ),
                           SizedBox(height: 5),
                           Text(
-                            "SOS untuk kirim lokasi ke kontak prioritas",
+                            "Tahan tombol selama 3 detik untuk mulai",
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.black54,
@@ -180,15 +204,15 @@ class EmergencyButtonWidget extends StatelessWidget {
 
                   // Tombol SOS
                   GestureDetector(
-                    onTap: controller.isSending.value
+                    onLongPressStart: controller.isSending.value
                         ? null
-                        : () {
-                            controller.isEmergencyActive.value = true;
-                            sos.startSos();
-                            onEmergencyPressed();
+                        : (_) {
+                            startHoldTimer();
                           },
+                    onLongPressEnd: (_) {
+                      stopHoldTimer();
+                    },
                     child: Obx(() {
-                      // Ukuran berubah saat active
                       final size =
                           controller.isEmergencyActive.value ? 180.0 : 231.0;
 
@@ -256,6 +280,26 @@ class EmergencyButtonWidget extends StatelessWidget {
                               ),
                             ),
 
+                            // Progress ring saat holding
+                            if (countdown.value == 0 && holdProgress.value > 0)
+                              Positioned(
+                                left: 0,
+                                top: 0,
+                                child: SizedBox(
+                                  width: size,
+                                  height: size,
+                                  child: CircularProgressIndicator(
+                                    value: holdProgress.value,
+                                    strokeWidth: 4,
+                                    valueColor:
+                                        const AlwaysStoppedAnimation<Color>(
+                                            Colors.white),
+                                    backgroundColor:
+                                        Colors.white.withOpacity(0.3),
+                                  ),
+                                ),
+                              ),
+
                             // === CHILD CONTENT ===
                             Obx(() {
                               if (controller.isSending.value) {
@@ -264,13 +308,27 @@ class EmergencyButtonWidget extends StatelessWidget {
                               } else if (countdown.value > 0) {
                                 return const SizedBox.shrink();
                               } else {
-                                return const Text(
-                                  'SOS',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      'SOS',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 28,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Tahan ${holdProgress.value > 0 ? (3 - holdProgress.value * 3).toStringAsFixed(1) : '3'} detik',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
                                 );
                               }
                             }),
@@ -295,61 +353,96 @@ class EmergencyButtonWidget extends StatelessWidget {
               ),
 
               const SizedBox(height: 20),
-              // Slide to cancel dari kanan ke kiri
+              // Slide to cancel
               if (countdown.value > 0)
-                Stack(
-                  children: [
-                    // Track
-                    Container(
-                      width: trackWidth,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        borderRadius: BorderRadius.circular(25),
+                Obx(() {
+                  final maxDrag = trackWidth - sliderWidth;
+                  final sliderProgress =
+                      (dragPosition.value / maxDrag).clamp(0.0, 1.0);
+
+                  return Stack(
+                    children: [
+                      Container(
+                        width: trackWidth,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: Color.lerp(
+                            const Color(0xFFFDE4E5),
+                            const Color(0xFFFFB3B8),
+                            sliderProgress,
+                          ),
+                          borderRadius: BorderRadius.circular(25),
+                          border: Border.all(
+                            color: const Color(0xFFEBBCC0),
+                            width: 1.5,
+                          ),
+                        ),
+                        alignment: Alignment.center,
+                        child: Text(
+                          "Geser untuk batalkan",
+                          style: TextStyle(
+                            color: Color.lerp(
+                              const Color(0xFFE8A1AC),
+                              const Color(0xFFD96B7A),
+                              sliderProgress,
+                            ),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
                       ),
-                      alignment: Alignment.center,
-                      child: const Text(
-                        "Geser untuk batalkan",
-                        style: TextStyle(color: Colors.black54),
-                      ),
-                    ),
-                    // Slider
-                    Obx(() => Positioned(
-                          left: trackWidth - sliderWidth - dragPosition.value,
-                          child: GestureDetector(
-                            onHorizontalDragUpdate: (details) {
-                              dragPosition.value -= details.delta.dx;
-                              if (dragPosition.value < 0)
-                                dragPosition.value = 0;
-                              if (dragPosition.value >
-                                  trackWidth - sliderWidth) {
-                                dragPosition.value = trackWidth - sliderWidth;
-                              }
-                            },
-                            onHorizontalDragEnd: (details) {
-                              if (dragPosition.value >=
-                                  trackWidth - sliderWidth) {
-                                cancelEmergency();
-                                sos.stopSos();
-                              } else {
-                                dragPosition.value = 0.0;
-                              }
-                            },
-                            child: Container(
-                              width: sliderWidth,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.red,
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              child: const Icon(Icons.arrow_left,
-                                  color: Colors.white),
+
+                      /// 🔴 SLIDER (START DARI KANAN)
+                      Positioned(
+                        right: dragPosition.value,
+                        child: GestureDetector(
+                          onHorizontalDragUpdate: (details) {
+                            dragPosition.value -= details.delta.dx;
+
+                            if (dragPosition.value < 0) {
+                              dragPosition.value = 0;
+                            }
+
+                            if (dragPosition.value > maxDrag) {
+                              dragPosition.value = maxDrag;
+                            }
+                          },
+                          onHorizontalDragEnd: (details) {
+                            if (dragPosition.value >= maxDrag) {
+                              cancelEmergency();
+                              sos.stopSos();
+                            } else {
+                              dragPosition.value = 0.0;
+                            }
+                          },
+                          child: Container(
+                            width: sliderWidth,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFF6B75),
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color:
+                                      const Color(0xFFFF6B75).withOpacity(0.4),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.arrow_back, // 👈 arah kiri
+                              color: Colors.white,
+                              size: 24,
                             ),
                           ),
-                        )),
-                  ],
-                ),
-              SizedBox(height: 100),
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+
+              const SizedBox(height: 100),
             ],
           )),
     );
@@ -357,12 +450,12 @@ class EmergencyButtonWidget extends StatelessWidget {
 }
 
 class _OptionIcon extends StatelessWidget {
-  final dynamic icon; // IconData, String (URL SVG, Base64 SVG, atau iconify)
+  final dynamic icon;
   final String label;
   final RxString selected;
-  final bool isCondition; // true kalau horizontal
+  final bool isCondition;
   final Color? iconBackgroundColor;
-  final bool isSvgUrl; // true jika icon adalah URL SVG atau Base64 SVG
+  final bool isSvgUrl;
 
   const _OptionIcon({
     required this.icon,
@@ -373,7 +466,6 @@ class _OptionIcon extends StatelessWidget {
     this.isSvgUrl = false,
   });
 
-  // Helper method untuk load SVG dari berbagai source
   Widget _buildSvgIcon(String iconSource, {Color? color}) {
     try {
       if (iconSource.startsWith('http')) {
@@ -407,17 +499,15 @@ class _OptionIcon extends StatelessWidget {
     return Obx(() {
       final isSelected = selected.value == label;
 
-      // Gesture untuk toggle select/unselect
       void handleTap() {
         if (isSelected) {
-          selected.value = ''; // unselect kalau sudah dipilih
+          selected.value = '';
         } else {
-          selected.value = label; // select kalau belum dipilih
+          selected.value = label;
         }
       }
 
       if (isCondition) {
-        // STYLE HORIZONTAL - WRAPPING LAYOUT
         return GestureDetector(
           onTap: handleTap,
           child: Container(
@@ -468,7 +558,6 @@ class _OptionIcon extends StatelessWidget {
         );
       }
 
-      // STYLE KOTAK BESAR - FULL CENTERED (tanpa background icon)
       return GestureDetector(
         onTap: handleTap,
         child: Container(
@@ -486,7 +575,6 @@ class _OptionIcon extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Icon dari SVG URL atau Flutter Icon
               isSvgUrl
                   ? SizedBox(
                       width: 50,
@@ -500,7 +588,6 @@ class _OptionIcon extends StatelessWidget {
                       size: 50,
                     ),
               const SizedBox(height: 8),
-              // Label
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 6),
                 child: Text(

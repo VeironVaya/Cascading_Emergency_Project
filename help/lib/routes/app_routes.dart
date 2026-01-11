@@ -10,4 +10,6 @@ abstract class AppRoutes {
   static const HANDLE_EMERGENCY = '/handle-emergency';
   static const GROUP_GALLERY = '/group-gallery';
   static const USER_GROUP = '/user-group';
+  static const DELETE_CIRCLE = '/delete-circle';
+  static const INVITE_CODE = '/invite-code';
 }
