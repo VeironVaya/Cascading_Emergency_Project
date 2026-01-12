@@ -63,13 +63,20 @@ class GroupController extends GetxController {
 
     List<Map<String, dynamic>> userGroups = [];
 
-    allGroups.forEach((key, value) {
-      final group = Map<String, dynamic>.from(value);
+    for (final entry in allGroups.entries) {
+      final groupId = entry.key;
+      final group = Map<String, dynamic>.from(entry.value);
+
       final members = Map<String, dynamic>.from(group['members'] ?? {});
+
       if (members.containsKey(user.uid) || group['ownerId'] == user.uid) {
-        userGroups.add(group);
+        // 🔥 AMBIL DETAIL GROUP (INI KUNCINYA)
+        final detail = await getGroupDetails(groupId);
+        if (detail != null) {
+          userGroups.add(detail);
+        }
       }
-    });
+    }
 
     return userGroups;
   }

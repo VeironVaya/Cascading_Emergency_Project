@@ -217,11 +217,23 @@ class ProfileView extends StatelessWidget {
             ),
             const Spacer(),
             IconButton(
-              icon: const Icon(Icons.logout, color: Colors.white),
               onPressed: () async {
                 await controller.logout();
               },
-            ),
+              icon: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.logout,
+                  color: Colors.red,
+                  size: 20,
+                ),
+              ),
+            )
           ],
         ),
       ),

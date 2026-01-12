@@ -208,7 +208,7 @@ class HomePage extends GetView<HomeController> {
       case "sedih":
         return "😢";
       default:
-        return "😐";
+        return "❓";
     }
   }
 }

@@ -179,66 +179,146 @@ class UserGroupsView extends StatelessWidget {
                           final group = groups[index];
                           final bool isOwner = group['ownerId'] == currentUid;
 
+                          final Map<String, dynamic> members =
+                              group['members'] != null
+                                  ? Map<String, dynamic>.from(group['members'])
+                                  : {};
+
+                          final totalMembers = members.length;
+                          final memberList = members.entries.take(2).toList();
+
                           return Card(
-                            color: Colors.white,
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 8),
-                            elevation: 4,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: ListTile(
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 12),
-
-                              /// ICON GROUP
-                              leading: CircleAvatar(
-                                radius: 24,
-                                backgroundColor:
-                                    const Color.fromARGB(255, 213, 213, 213),
-                                child: const Icon(
-                                  Icons.group,
-                                  color: Colors.deepPurpleAccent,
-                                  size: 26,
-                                ),
-                              ),
-
-                              /// NAMA GROUP
-                              title: Text(
-                                group['name'] ?? "-",
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-
-                              /// SUBTITLE
-                              subtitle: Column(
+                                borderRadius: BorderRadius.circular(16)),
+                            elevation: 3,
+                            color: Colors.white,
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const SizedBox(height: 4),
-                                  Text(
-                                    "Code: ${group['code']}",
-                                    style: const TextStyle(fontSize: 13),
+                                  /// HEADER GROUP
+                                  Row(
+                                    children: [
+                                      Container(
+                                        width: 36,
+                                        height: 36,
+                                        decoration: BoxDecoration(
+                                          color: const Color.fromARGB(
+                                              255, 227, 227, 227),
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: const Icon(
+                                          Icons.group,
+                                          size: 18,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Text(
+                                          group['name'],
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  if (isOwner)
-                                    const Text(
-                                      "Owner",
-                                      style: TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.orange,
-                                        fontWeight: FontWeight.w600,
+                                  const SizedBox(height: 12),
+                                  const Divider(
+                                    height: 1,
+                                    thickness: 1,
+                                  ),
+                                  const SizedBox(height: 12),
+
+                                  /// MEMBER LIST (MAX 2)
+                                  ...memberList.map((entry) {
+                                    final member = entry.value;
+
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 6),
+                                      child: Row(
+                                        children: [
+                                          /// AVATAR
+
+                                          const CircleAvatar(
+                                            radius: 18,
+                                            backgroundColor: Color.fromARGB(
+                                                255, 227, 227, 227),
+                                            child: Icon(Icons.person,
+                                                size: 18, color: Colors.white),
+                                          ),
+
+                                          const SizedBox(width: 10),
+
+                                          /// NAME + USERNAME
+                                          Expanded(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  member['username'],
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                                Text(
+                                                  "@${member['username']}",
+                                                  style: const TextStyle(
+                                                    fontSize: 12,
+                                                    color: Colors.grey,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+
+                                          /// CONDITION EMOJI
+                                          Text(
+                                            _conditionEmoji(
+                                                member['condition']),
+                                            style:
+                                                const TextStyle(fontSize: 20),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }),
+
+                                  /// LIHAT SEMUA
+                                  InkWell(
+                                    onTap: () {
+                                      Get.toNamed(
+                                        AppRoutes.GROUP_DETAIL,
+                                        arguments: {"groupId": group['id']},
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(top: 8),
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.chevron_right,
+                                              color: Colors.grey),
+                                          SizedBox(width: 4),
+                                          Text(
+                                            "Lihat semua",
+                                            style:
+                                                TextStyle(color: Colors.grey),
+                                          ),
+                                        ],
                                       ),
                                     ),
+                                  ),
                                 ],
                               ),
-
-                              onTap: () {
-                                Get.toNamed(
-                                  AppRoutes.GROUP_DETAIL,
-                                  arguments: {"groupId": group['id']},
-                                );
-                              },
                             ),
                           );
                         },
@@ -257,5 +337,22 @@ class UserGroupsView extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+String _conditionEmoji(String condition) {
+  switch (condition.toLowerCase()) {
+    case "sangat baik":
+      return "😀";
+    case "baik":
+      return "🙂";
+    case "biasa saja":
+      return "😐";
+    case "kurang baik":
+      return "🙁";
+    case "sedih":
+      return "😢";
+    default:
+      return "❓";
   }
 }
