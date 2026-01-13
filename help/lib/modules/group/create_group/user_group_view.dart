@@ -32,7 +32,7 @@ class UserGroupsView extends StatelessWidget {
 
             // TITLE
             const Text(
-              "Group",
+              "Circle",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,

@@ -147,7 +147,7 @@ class EmergencyController extends GetxController {
 
       // === Send to backend ===
       final res = await http.post(
-        Uri.parse("http://192.168.1.67:5000/emergency"),
+        Uri.parse("http://10.78.116.38:5000/emergency"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",
@@ -182,7 +182,7 @@ class EmergencyController extends GetxController {
   // ========== ACCEPT EMERGENCY ==========
   Future<void> acceptEmergency(String emergencyId) async {
     final res = await http.post(
-      Uri.parse("http://192.168.1.67:5000/emergency/$emergencyId/accept"),
+      Uri.parse("http://10.78.116.38:5000/emergency/$emergencyId/accept"),
       headers: {
         "Content-Type": "application/json",
         "x-api-key": "123456",
@@ -198,7 +198,7 @@ class EmergencyController extends GetxController {
   }) async {
     try {
       final res = await http.post(
-        Uri.parse("http://192.168.1.67:5000/emergency/$emergencyId/reject"),
+        Uri.parse("http://10.78.116.38:5000/emergency/$emergencyId/reject"),
         headers: {
           "Content-Type": "application/json",
           "x-api-key": "123456",

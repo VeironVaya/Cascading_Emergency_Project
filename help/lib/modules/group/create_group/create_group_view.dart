@@ -23,7 +23,7 @@ class CreateGroupView extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
         title: const Text(
-          "Buat circle",
+          "Buat Circle",
           style: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -95,7 +95,7 @@ class CreateGroupView extends StatelessWidget {
               TextField(
                 onChanged: (value) => controller.name.value = value,
                 decoration: InputDecoration(
-                  hintText: "Kimchi Fam💗",
+                  hintText: "Masukkan",
                   filled: true,
                   fillColor: const Color(0xFFF3F3F3),
                   contentPadding: const EdgeInsets.symmetric(
@@ -134,7 +134,7 @@ class CreateGroupView extends StatelessWidget {
                           ),
                         )
                       : const Text(
-                          "Simpan",
+                          "View",
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,

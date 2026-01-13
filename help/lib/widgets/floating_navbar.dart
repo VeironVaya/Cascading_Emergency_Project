@@ -13,7 +13,7 @@ class FloatingNavbar extends StatelessWidget {
     final items = [
       _NavItem("Home", Icons.home, AppRoutes.HOME),
       _NavItem("Kontak", Icons.contact_phone, AppRoutes.PRIORITY),
-      _NavItem("Grup", Icons.group, AppRoutes.USER_GROUP),
+      _NavItem("Circle", Icons.group, AppRoutes.USER_GROUP),
       _NavItem("Profil", Icons.person, AppRoutes.PROFILE),
     ];
 

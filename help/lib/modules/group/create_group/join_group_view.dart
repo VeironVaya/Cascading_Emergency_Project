@@ -37,7 +37,7 @@ class JoinGroupView extends StatelessWidget {
             ),
             const SizedBox(width: 6),
             const Text(
-              "Join Group",
+              "Join Circle",
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 18,

@@ -56,7 +56,7 @@ class EmergencyButtonWidget extends StatelessWidget {
         sendEmergencyAuto();
       } else {
         showFields.value = true;
-        countdown.value = 15;
+        countdown.value = 8;
         dragPosition.value = 0.0;
         timer = Timer.periodic(const Duration(seconds: 1), (t) {
           if (countdown.value > 1) {
@@ -107,23 +107,30 @@ class EmergencyButtonWidget extends StatelessWidget {
                       runSpacing: 12,
                       children: [
                         _OptionIcon(
-                            icon: Icons.warning,
-                            label: "Kritis",
+                            icon: Icons.heart_broken,
+                            label: "Pembullyan",
                             selected: conditionC,
                             isCondition: true,
                             iconBackgroundColor: Colors.red),
                         _OptionIcon(
-                            icon: Icons.info,
-                            label: "Sedang",
+                            icon: Icons.health_and_safety,
+                            label: "Kesehatan",
+                            selected: conditionC,
+                            isCondition: true,
+                            iconBackgroundColor: Colors.green),
+                        _OptionIcon(
+                            icon: Icons.remove_red_eye,
+                            label: "Stalker",
                             selected: conditionC,
                             isCondition: true,
                             iconBackgroundColor: Colors.yellow),
                         _OptionIcon(
-                            icon: Icons.check_circle,
-                            label: "Ringan",
+                            icon: Icons.dangerous,
+                            label: "Kekerasan",
                             selected: conditionC,
                             isCondition: true,
-                            iconBackgroundColor: Colors.green),
+                            iconBackgroundColor:
+                                const Color.fromARGB(255, 255, 27, 10)),
                       ],
                     ),
                     const SizedBox(height: 20),
