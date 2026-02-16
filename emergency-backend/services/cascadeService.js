@@ -2,56 +2,80 @@ import admin from "../firebase.js";
 import { sendFCM } from "./fcmService.js";
 
 export async function cascadeToNext(emergencyId, emergency) {
-  const db = admin.database().ref("emergencies/" + emergencyId);
+  const db = admin.database().ref(`emergencies/${emergencyId}`);
 
-  let index = emergency.currentPriorityIndex;
+  const index = emergency.currentPriorityIndex;
   const list = emergency.priorities;
 
   if (index >= list.length) {
     console.log("🔥 No more priorities left.");
     await db.update({ status: "all_failed" });
+    
     return;
   }
 
-  const helper = list[index];
-  const token = helper.fcmToken;
+  const helperUid = list[index].targetUid;
+
+  const tokenSnap = await admin.database()
+    .ref(`users/${helperUid}/fcmToken`)
+    .get();
+
+  const token = tokenSnap.val();
 
   if (!token) {
-    console.log(`❌ Priority ${index} has NO token → skipping`);
+    console.log("❌ No token → skip helper");
     emergency.currentPriorityIndex++;
     await db.update({ currentPriorityIndex: emergency.currentPriorityIndex });
     return cascadeToNext(emergencyId, emergency);
   }
 
-  console.log(`📨 Sending notification to priority ${index}:`, token);
+  console.log(`📨 Sending notification to priority ${index}`);
 
-  await sendFCM(
-    token,
-    `Emergency: ${emergency.type}`,
-    `${emergency.need} — ${emergency.condition || ""}`,
-    { emergencyId }
-  );
+  try {
+    await sendFCM(
+      token,
+      `Emergency: ${emergency.type}`,
+      `${emergency.need} — ${emergency.condition || ""}`,
+      { emergencyId }
+    );
+  } catch (err) {
+    console.error("❌ FCM error:", err.code);
 
-  const sentTime = Date.now();
-  await db.update({ lastSentAt: sentTime });
+    if (err.code === "messaging/registration-token-not-registered") {
+      console.log("🗑 Removing invalid token");
+      await admin.database()
+        .ref(`users/${helperUid}/fcmToken`)
+        .remove();
+    }
+
+    emergency.currentPriorityIndex++;
+    await db.update({ currentPriorityIndex: emergency.currentPriorityIndex });
+
+    return cascadeToNext(emergencyId, emergency);
+  }
+
+  await db.update({
+    lastSentAt: Date.now(),
+    status: "waiting_response",
+  });
 
   setTimeout(async () => {
-    const snapshot = await db.get();
-    const updated = snapshot.val();
+    const snap = await db.get();
+    const updated = snap.val();
 
     if (!updated) return;
     if (updated.helperAccepted) return;
-    if (updated.status !== "pending") return;
+    if (updated.status !== "waiting_response") return;
 
     updated.currentPriorityIndex++;
 
     await db.update({
       currentPriorityIndex: updated.currentPriorityIndex,
+      status: "pending",
     });
 
     console.log("⏭ Moving to next priority:", updated.currentPriorityIndex);
 
     cascadeToNext(emergencyId, updated);
-
   }, 10000);
 }

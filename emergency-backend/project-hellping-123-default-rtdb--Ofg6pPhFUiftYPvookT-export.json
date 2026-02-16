@@ -1,0 +1,28 @@
+{
+  "condition": "",
+  "createdAt": "2025-12-05T08:27:48.144268",
+  "currentPriorityIndex": 1,
+  "location": {
+    "lat": 37.4219983,
+    "lng": -122.084
+  },
+  "mapsUrl": "https://www.google.com/maps/search/?api=1&query=37.4219983,-122.084",
+  "need": "huh ",
+  "priorities": [
+    {
+      "id": "-OfZpzDU4j39ufKXqfaz",
+      "priorityLevel": 1,
+      "targetUid": "TzktKfEFuLg571qXLui9S1lFGd42",
+      "targetUsername": "ibu1"
+    },
+    {
+      "id": "-OfZqjb-jG9BfTvGHaj2",
+      "priorityLevel": 1,
+      "targetUid": "JWIb7mwTV4ZE3JNtOkLfnDHvjjy2",
+      "targetUsername": "ayah1"
+    }
+  ],
+  "senderUid": "HKrjZwGIbLfsXtiRfvC9oK5ZQR53",
+  "status": "pending",
+  "type": "red"
+}
